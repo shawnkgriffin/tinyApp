@@ -7,10 +7,20 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+let templateVars = { urls: urlDatabase };
+for (let item in templateVars.urls) {
+  console.log(item, urlDatabase[item]);
+}
+
 // set the view engine to ejs
 app.set("view engine", "ejs");
 // use res.render to load up an ejs view file
 
+
+app.get("/urls", (req, res) => {
+  let templateVars = { urls: urlDatabase };
+  res.render("pages/urls_index", templateVars);
+});
 
 // index page
 app.get("/", (req, res) => {
@@ -28,9 +38,10 @@ app.get("/", (req, res) => {
   });
 });
 // about page
-app.get("/about", function(req, res) {
+app.get("/about", function(req, res) {  
   res.render("pages/about");
 });
+
 
 app.listen(8080);
 console.log("8080 is the magic port");

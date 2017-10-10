@@ -1,4 +1,4 @@
-<!-- views/pages/index.ejs -->
+<!-- views/pages/urs_index.ejs -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,14 +13,13 @@
 
 <main>
     <div class="jumbotron">
-        <h1>This is great</h1>
-        <p>Welcome to templating using EJS</p>
-    <h2>Loop</h2>
+    <h2>Your Short URLs</h2>
 
+  
   <ul>
-      <% drinks.forEach(function(drink) { %>
-          <li><%= drink.name %> - <%= drink.drunkness %></li>
-      <% }); %>
+      <% for (let item in urls ) { %>
+          <li> <%=item%> : <%=urls[item]%> <button type="button">Edit</button><button type="button">Delete</button></li>
+    <% };%>
   </ul>
 </main>
 
