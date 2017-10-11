@@ -16,10 +16,16 @@ for (let item in templateVars.urls) {
 app.set("view engine", "ejs");
 // use res.render to load up an ejs view file
 
-
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("pages/urls_index", templateVars);
+});
+
+app.get("/urls/:id", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.id
+  };
+  res.render("pages/urls_show", templateVars);
 });
 
 // index page
@@ -38,10 +44,9 @@ app.get("/", (req, res) => {
   });
 });
 // about page
-app.get("/about", function(req, res) {  
+app.get("/about", function(req, res) {
   res.render("pages/about");
 });
-
 
 app.listen(8080);
 console.log("8080 is the magic port");
