@@ -7,7 +7,7 @@ const tinyURLLength = 6;
 
 // Temporary database.
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
+  b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
@@ -15,20 +15,20 @@ var urlDatabase = {
 
 // generate 6 random alphanumeric characters
 function generateRandomString(length) {
-  const validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const validChars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let random = "";
   for (let i = 0; i < length; i++) {
-    random  += validChars[Math.floor(Math.random() * validChars.length)];
+    random += validChars[Math.floor(Math.random() * validChars.length)];
   }
   return random;
-  }
-
+}
 
 // set the view engine to ejs
 app.set("view engine", "ejs");
 
 // use body parser
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // use res.render to load up an ejs view file
 
@@ -42,22 +42,27 @@ app.get("/urls", (req, res) => {
   res.render("pages/urls_index", templateVars);
 });
 
-
 app.get("/urls/new", (req, res) => {
   res.render("pages/urls_new");
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
   const key = generateRandomString(tinyURLLength);
-  urlDatabase[key]  = "http://" + req.body.longURL;
-   
-  res.redirect('/urls/'+ key );       
+  urlDatabase[key] = "http://" + req.body.longURL;
+
+  res.redirect("/urls/" + key);
+});
+
+app.post("/urls/:id/change", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+
+  res.redirect("/urls/" + key);
 });
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    shortURL: req.params.id
+    shortURL: req.params.id,
+    longURL : urlDatabase[req.params.id]
   };
   res.render("pages/urls_show", templateVars);
 });
@@ -69,7 +74,6 @@ app.get("/urls/:id/delete", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("pages/urls_index", templateVars);
 });
-
 
 // What would happen if a client requests a non-existent shortURL?
 // What happens to the urlDatabase when the server is restarted?
