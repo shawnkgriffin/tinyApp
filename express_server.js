@@ -7,7 +7,7 @@ const tinyURLLength = 6;
 
 // Temporary database.
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
+  b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
@@ -53,18 +53,18 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + key);
 });
 
-//change a Long URL 
+//change a Long URL
 app.post("/urls/:id/change", (req, res) => {
   urlDatabase[req.params.id] = req.body.newLongURL;
 
   res.redirect("/");
 });
 
-//show 
+//show
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL : urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id]
   };
   res.render("pages/urls_show", templateVars);
 });
