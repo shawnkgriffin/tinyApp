@@ -1,4 +1,4 @@
-<!-- views/pages/urs_show.ejs -->
+<!-- views/pages/urls_show.ejs -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,10 +15,10 @@
     <div class="jumbotron">
     <h2>Your Short URL is <%=shortURL%></h2>
     
-  <form action="/urls" method="POST" style="margin:150px;">
+  <form action="/urls/<%=shortURL%>/change" method="POST" style="margin:0px;">
           <label for="longURL">Change if you want a different URL or press OK:</label>
-          <input id="longURL" type="text" name="longURL" placeholder=<%=longURL%> style="width: 300px">
-          <input type="submit" value="Submit">
+          <input id="longURL" type="text" name="newLongURL" value=<%=longURL%> style="width: 300px">
+          <input type="submit" value="OK">
         </form>
   </main>
 
