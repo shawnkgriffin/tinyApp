@@ -62,6 +62,15 @@ app.get("/urls/:id", (req, res) => {
   res.render("pages/urls_show", templateVars);
 });
 
+//Delete the URL at shortURL
+app.get("/urls/:id/delete", (req, res) => {
+  let shortURL = req.params.id;
+  delete urlDatabase[shortURL];
+  let templateVars = { urls: urlDatabase };
+  res.render("pages/urls_index", templateVars);
+});
+
+
 // What would happen if a client requests a non-existent shortURL?
 // What happens to the urlDatabase when the server is restarted?
 // Should your redirects be 301 or 302 - What is the difference?
