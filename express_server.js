@@ -141,6 +141,17 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// POST /logout - from any header
+// Delete the cookie, go back to /urls
+app.post("/logout", (req, res) => {
+  //TODO check parameters
+
+  console.log("logout");
+  //TODO check that name is not empty
+  res.clearCookie("username");
+
+  res.redirect("/urls");
+});
 
 app.listen(8080);
 console.log("8080 is the magic port");

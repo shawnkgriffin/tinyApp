@@ -31,6 +31,11 @@
 </form>
 <% } else {%>
 <h1> <%=username%> </h1>
-<button type="button" onclick="window.location.href='/logout'" class="btn btn-danger btn-xs">Logout</button></td>
+<button type="button" formmethod="POST" formaction="/logut" class="btn btn-danger btn-xs">Logout</button></td>
+<form action="/logout" method="POST" style="margin:0px;">
+    <label for="longURL">Enter your userid to login:</label>
+    <input id="longURL" type="text" name="userID" placeholder='userid' style="width: 300px">
+    <input type="submit" value="Logout">
+</form>
 <%}%>
  
