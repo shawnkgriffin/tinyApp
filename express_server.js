@@ -1,7 +1,11 @@
 //requires and globals
 const bodyParser = require("body-parser");
 var express = require("express");
+var cookieParser = require('cookie-parser')
 var app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser())
+
 var PORT = process.env.PORT || 8080; // default port 8080
 const tinyURLLength = 6;
 
@@ -27,13 +31,15 @@ function generateRandomString(length) {
 // set the view engine to ejs
 app.set("view engine", "ejs");
 
-// use body parser
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // use res.render to load up an ejs view file
 
 app.get("/", (req, res) => {
   let templateVars = { urls: urlDatabase };
+
+  // Cookies that have not been signed
+  console.log('Cookies: ', req.cookies)
+  
   res.render("pages/urls_index", templateVars);
 });
 
@@ -60,7 +66,17 @@ app.post("/urls/:id/change", (req, res) => {
   res.redirect("/");
 });
 
-//show
+// Login
+app.post("/login", (req, res) => {
+  
+  console.log('Userid ',req.body.userID);
+
+  res.cookie('username', req.body.userID);
+
+  res.redirect("/urls");
+});
+
+//show the URL and allow the user to change the URL. 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
