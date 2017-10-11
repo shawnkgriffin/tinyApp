@@ -18,7 +18,10 @@
   
   <ul>
       <% for (let item in urls ) { %>
-          <li> <%=item%> : <%=urls[item]%> <button type="button">Edit</button><button type="button">Delete</button></li>
+          <li> <%=item%> : <%=urls[item]%> 
+          <button class="w3-button w3-black w3-round-xxlarge">Edit</button>
+          <button class="w3-button w3-black w3-round-xxlarge">Delete</button>
+          </li>
     <% };%>
   </ul>
 </main>
