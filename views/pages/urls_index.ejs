@@ -15,15 +15,26 @@
     <div class="jumbotron">
     <h2>Your Short URLs</h2>
 
-  
-  <ul>
-      <% for (let item in urls ) { %>
-          <li> <%=item%> : <%=urls[item]%> 
-          <button class="w3-button w3-black w3-round-xxlarge">Edit</button>
-          <button class="w3-button w3-black w3-round-xxlarge">Delete</button>
-          </li>
+  <div class="bs-example" data-example-id="striped-table"> 
+  <table class="table table-striped"> 
+  <thead> 
+  <tr> <th>#</th> <th>Short URL</th> <th>Full URL</th> </tr> 
+  </thead> 
+  <% let i = 1;%>
+  <tbody> 
+  <% for (let item in urls ) { %>
+          <tr> <th scope="row"><%=i%></th> 
+          <td><%=item%></td> 
+          <td><%=urls[item]%></td> 
+          <td> <button type="button" class="btn btn-primary btn-xs">Edit</button></td>
+           <td> <button type="button" class="btn btn-danger btn-xs">Delete</button></td>
+       </tr>
+    <% i++;%>
     <% };%>
-  </ul>
+    
+    </tbody> 
+   </table> 
+   </div>
 </main>
 
 <footer>
