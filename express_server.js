@@ -46,8 +46,8 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // debug statement to see POST parameters
   const key = generateRandomString(tinyURLLength);
   urlDatabase[key]  = "http://" + req.body.longURL;
-  //res.send("Ok"); 
-  res.redirect('/urls/'+ key );        // Respond with 'Ok' (we will replace this)
+   
+  res.redirect('/urls/'+ key );       
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -57,6 +57,9 @@ app.get("/urls/:id", (req, res) => {
   res.render("pages/urls_show", templateVars);
 });
 
+// What would happen if a client requests a non-existent shortURL?
+// What happens to the urlDatabase when the server is restarted?
+// Should your redirects be 301 or 302 - What is the difference?
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
