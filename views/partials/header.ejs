@@ -22,19 +22,14 @@
 </nav>
 
 
-<% if (!username ) {%>
+<% if (!user.id ) {%>
 <h1> Please Log In </h1>
-<form action="/login" method="POST" style="margin:0px;">
-    <label for="longURL">Enter your userid to login:</label>
-    <input id="longURL" type="text" name="userID" placeholder='userid' style="width: 300px">
-    <input type="submit" value="Submit">
-</form>
+
 <% } else {%>
-<h1> <%=username%> </h1>
-<button type="button" formmethod="POST" formaction="/logut" class="btn btn-danger btn-xs">Logout</button></td>
+<h1> <%=user.email%> </h1>
+<button type="button" formmethod="POST" formaction="/logout" class="btn btn-danger btn-xs">Logout</button></td>
 <form action="/logout" method="POST" style="margin:0px;">
-    <label for="longURL">Enter your userid to login:</label>
-    <input id="longURL" type="text" name="userID" placeholder='userid' style="width: 300px">
+    <input id="longURL" type="text" name="userID" placeholder='userid' style="width:0px">
     <input type="submit" value="Logout">
 </form>
 <%}%>
