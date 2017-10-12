@@ -24,6 +24,7 @@ const users = {
 };
 
 // Functions and other worker items remember to refactor these to a module.
+<<<<<<< HEAD
 //  TODO   check that the key is not a duplicate. or make that part of generateRandomString?
 function addUser(newEmail, newPassword) {
   for (const key in users) {
@@ -41,6 +42,8 @@ function addUser(newEmail, newPassword) {
   
   return newuserID;
 }
+=======
+>>>>>>> c7dde09086b1ebb56b829e7f5fe7509005e32a3b
 
 // generate length random alphanumeric characters
 function generateRandomString(length) {
@@ -75,6 +78,10 @@ function getEmail(userID) {
 module.exports = {
   // User functions
   getEmail: getEmail,
+<<<<<<< HEAD
   validUser: validUser,
   addUser: addUser
+=======
+  validUser: validUser
+>>>>>>> c7dde09086b1ebb56b829e7f5fe7509005e32a3b
 };
