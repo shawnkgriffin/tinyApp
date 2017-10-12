@@ -3,6 +3,7 @@
 const bodyParser = require("body-parser");
 var express = require("express");
 var cookieParser = require("cookie-parser");
+var myDataBase = require("./database");
 
 //start up express, set up the components we are using.
 var app = express();
@@ -52,24 +53,9 @@ function generateRandomString(length) {
   return random;
 }
 
-//Get a valid userID from email and password
-// (email, password) => userID (string) undefined if not found.
 
-function validUser(email, password) {
-  for (let key in users) {
-    if (users[key].email === email && users[key].password === password) {
-      return users[key].id;
-    }
-  }
-  return "";
-}
 
-//Get a email from userID
-// (userID) => email (string) undefined if not found.
 
-function getEmail(userID) {
-  return users[userID].email;
-}
 
 // GET /login - Login page for a user
 // Posts /login for verification
