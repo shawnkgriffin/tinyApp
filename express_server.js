@@ -3,7 +3,7 @@
 const bodyParser = require("body-parser");
 var express = require("express");
 var cookieParser = require("cookie-parser");
-var myDataBase = require("./database");
+var myDatabase = require("./database");
 
 //start up express, set up the components we are using.
 var app = express();
@@ -22,23 +22,7 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  },
-  asdfas: {
-    id: "asdfas",
-    email: "shawn@shawngriffin.com",
-    password: "shawn"
-  }
-};
+
 
 // Functions and other worker items remember to refactor these to a module.
 
@@ -76,7 +60,7 @@ app.get("/login", function(req, res) {
 app.post("/login", (req, res) => {
   //TODO check parameters
 
-  const userID = validUser(req.body.inputEmail, req.body.inputPassword);
+  const userID = myDatabase.validUser(req.body.inputEmail, req.body.inputPassword);
 
   //TODO check that name is not empty
   if (!userID) {
@@ -96,7 +80,7 @@ app.post("/login", (req, res) => {
     urls: urlDatabase,
     user: {
       id: userID,
-      email: getEmail(userID)
+      email: myDatabase.getEmail(userID)
     },
     error: ""
   };
@@ -108,7 +92,7 @@ app.post("/login", (req, res) => {
 // POST /register - Add a new user
 // returns a page with an email address and a password.
 app.post("/register", function(req, res) {
-  let newEmail = req.body.inputEmail;
+   let newEmail = req.body.inputEmail;
   let newPassword = req.body.inputPassword;
 
   // If the e-mail or password are empty strings, send back a response with the 400 status code.
@@ -123,28 +107,28 @@ app.post("/register", function(req, res) {
     return;
   }
 
-  //TODO If someone tries to register with an existing user's email, send back a response with the 400 status code.
-  for (const key in users) {
-    if (users[key].email == newEmail) {
-      res.status(400).send("Duplicate email address.");
-      return;
-    }
-  }
-
-  //  TODO   check that the key is not a duplicate. or make that part of generateRandomString?
-  let newuserID = generateRandomString(tinyURLLength);
-
-  users[newuserID] = {
-    id: newuserID,
-    email: newEmail,
-    password: newPassword
-  };
+  let userID = myDatabase.addUser( req.body.inputEmail, req.body.inputPassword);
 
   // Set the cookie
-  res.cookie("id", newuserID);
+  res.cookie("id", userID);
 
   //Redict back to main page to show the user their URLs.
   res.redirect("/urls");
+});
+
+// GET /register - Add a new user
+// returns a page with an email address and a password.
+app.get("/register", function(req, res) {
+  //TODO should we be registering if we have an existing user? Maybe make them logout first
+  res.clearCookie("id");
+  let templateVars = {
+    user: {
+      id: "",
+      email: ""
+    },
+    error: ""
+  };
+  res.render("pages/register", templateVars);
 });
 
 // POST /login - login a user
@@ -218,7 +202,7 @@ app.get("/", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: getEmail(req.cookies["id"])
+      email: myDatabase.getEmail(req.cookies["id"])
     }
   };
 
@@ -232,7 +216,7 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: getEmail(req.cookies["id"])
+      email: myDatabase.getEmail(req.cookies["id"])
     }
   };
   res.render("pages/urls_index", templateVars);
@@ -245,9 +229,9 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: getEmail(req.cookies["id"])
+      email: myDatabase.getEmail(req.cookies["id"])
     }
-  };
+  }
 
   res.render("pages/urls_new", templateVars);
 });
@@ -259,7 +243,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id],
     user: {
       id: req.cookies["id"],
-      email: getEmail(req.cookies["id"])
+      email: myDatabase.getEmail(req.cookies["id"])
     }
   };
   res.render("pages/urls_show", templateVars);
@@ -276,7 +260,7 @@ app.get("/urls/:id/delete", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: getEmail(req.cookies["id"])
+      email: myDatabase.getEmail(req.cookies["id"])
     }
   };
 
@@ -299,27 +283,14 @@ app.get("/about", function(req, res) {
   let templateVars = {
     user: {
       id: req.cookies["id"],
-      email: getEmail(req.cookies["id"])
+      email: myDatabase.getEmail(req.cookies["id"])
     }
   };
 
   res.render("pages/about", templateVars);
 });
 
-// GET /register - Add a new user
-// returns a page with an email address and a password.
-app.get("/register", function(req, res) {
-  //TODO should we be registering if we have an existing user? Maybe make them logout first
-  res.clearCookie("id");
-  let templateVars = {
-    user: {
-      id: "",
-      email: ""
-    },
-    error: ""
-  };
-  res.render("pages/register", templateVars);
-});
+
 
 // GET /logout - from any header
 // Delete the cookie, go back to /urls
