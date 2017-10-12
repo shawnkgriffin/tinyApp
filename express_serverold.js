@@ -22,6 +22,8 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
+
 // Functions and other worker items remember to refactor these to a module.
 
 // generate length random alphanumeric characters
@@ -34,6 +36,10 @@ function generateRandomString(length) {
   }
   return random;
 }
+
+
+
+
 
 // GET /login - Login page for a user
 // Posts /login for verification
@@ -70,7 +76,6 @@ app.post("/login", (req, res) => {
     res.render("pages/login", templateVars);
     return;
   }
- // TODO refactor as we do this a lot. 
   let templateVars = {
     urls: urlDatabase,
     user: {
@@ -87,37 +92,25 @@ app.post("/login", (req, res) => {
 // POST /register - Add a new user
 // returns a page with an email address and a password.
 app.post("/register", function(req, res) {
-  let newuserID = myDatabase.addUser(
-    req.body.inputEmail,
-    req.body.inputPassword
-  );
+   let newEmail = req.body.inputEmail;
+  let newPassword = req.body.inputPassword;
 
-  // Set the cookie
-  res.cookie("id", newuserID);
-
-  //Redict back to main page to show the user their URLs.
-  res.redirect("/urls");
-});
-
-// POST /login - login a user
-app.post("/login", function(req, res) {
-  let newUserID = myDatabase.validUser(
-    req.body.inputEmail,
-    req.body.inputEmail
-  );
   // If the e-mail or password are empty strings, send back a response with the 400 status code.
-  if (!newUserID) {
-    let templateVars = {
-      user: {
-        id: "",
-        email: ""
-      },
-      error: "You need a valid email address and password to login."
-    };
-    res.render("pages/login", templateVars);
+  if (!newEmail || !newPassword) {
+    res
+      .status(400)
+      .send(
+        !newEmail
+          ? "You need a valid email address."
+          : "You must enter a password."
+      );
+    return;
   }
+
+  let userID = myDatabase.addUser( req.body.inputEmail, req.body.inputPassword);
+
   // Set the cookie
-  res.cookie("id", newUserID);
+  res.cookie("id", userID);
 
   //Redict back to main page to show the user their URLs.
   res.redirect("/urls");
@@ -136,6 +129,48 @@ app.get("/register", function(req, res) {
     error: ""
   };
   res.render("pages/register", templateVars);
+});
+
+// POST /login - login a user
+app.post("/login", function(req, res) {
+  let newEmail = req.body.inputEmail;
+  let newPassword = req.body.inputPassword;
+
+  // If the e-mail or password are empty strings, send back a response with the 400 status code.
+  if (!newEmail || !newPassword) {
+    res
+      .status(400)
+      .send(
+        !newEmail
+          ? "You need a valid email address."
+          : "You must enter a password."
+      );
+    return;
+  }
+
+  //TODO If someone tries to register with an existing user's email, send back a response with the 400 status code.
+  for (const key in users) {
+    if (users[key].email == newEmail) {
+      res.status(400).send("Invalid password ");
+      res.redirect("/login");
+      return;
+    }
+  }
+
+  //  TODO   check that the key is not a duplicate. or make that part of generateRandomString?
+  let newuserID = generateRandomString(tinyURLLength);
+
+  users[newuserID] = {
+    id: newuserID,
+    email: newEmail,
+    password: newPassword
+  };
+
+  // Set the cookie
+  res.cookie("id", newuserID);
+
+  //Redict back to main page to show the user their URLs.
+  res.redirect("/urls");
 });
 
 // Set up a router in front to redirect any pages to Login if you are not logged in.
@@ -196,7 +231,7 @@ app.get("/urls/new", (req, res) => {
       id: req.cookies["id"],
       email: myDatabase.getEmail(req.cookies["id"])
     }
-  };
+  }
 
   res.render("pages/urls_new", templateVars);
 });
@@ -255,6 +290,8 @@ app.get("/about", function(req, res) {
   res.render("pages/about", templateVars);
 });
 
+
+
 // GET /logout - from any header
 // Delete the cookie, go back to /urls
 app.get("/logout", (req, res) => {
@@ -292,6 +329,8 @@ app.post("/urls/:id/change", (req, res) => {
 
   res.redirect("/");
 });
+
+
 
 app.listen(8080);
 console.log("8080 is the magic port");
