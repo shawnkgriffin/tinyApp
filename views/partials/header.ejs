@@ -23,14 +23,14 @@
 
 
 <% if (!user.id ) {%>
-<h1> Please Log In </h1>
+<h1> Please Log In or Register
+<td> <button type="button" onclick="window.location.href='/login'" class="btn btn-primary btn-xs">Login</button></td>
+<td> <button type="button" onclick="window.location.href='/register'" class="btn btn-primary btn-xs">Register</button></td>
+
+</h1>
 
 <% } else {%>
-<h1> <%=user.email%> </h1>
-<button type="button" formmethod="POST" formaction="/logout" class="btn btn-danger btn-xs">Logout</button></td>
-<form action="/logout" method="POST" style="margin:0px;">
-    <input id="longURL" type="text" name="userID" placeholder='userid' style="width:0px">
-    <input type="submit" value="Logout">
-</form>
+<h1> <%=user.email%> 
+<td> <button type="button" onclick="window.location.href='/logout'" class="btn btn-primary btn-xs">Logout</button></td>
 <%}%>
  

@@ -31,6 +31,11 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  asdfas: {
+    id: "asdfas",
+    email: "shawn@shawngriffin.com",
+    password: "shawn"
   }
 };
 
@@ -47,6 +52,25 @@ function generateRandomString(length) {
   return random;
 }
 
+//Get a valid userID from email and password
+// (email, password) => userID (string) undefined if not found.
+
+function validUser(email, password) {
+  for (let key in users) {
+    if (users[key].email === email && users[key].password === password) {
+      return users[key].id;
+    }
+  }
+  return "";
+}
+
+//Get a email from userID
+// (userID) => email (string) undefined if not found.
+
+function getEmail(userID) {
+  return users[userID].email;
+}
+
 // GET HANDLERS
 // use res.render to load up an ejs view file
 // GET /
@@ -55,9 +79,7 @@ app.get("/", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
+      email: getEmail(req.cookies["id"])
     }
   };
 
@@ -74,9 +96,7 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
+      email: getEmail(req.cookies["id"])
     }
   };
   res.render("pages/urls_index", templateVars);
@@ -89,9 +109,7 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
+      email: getEmail(req.cookies["id"])
     }
   };
 
@@ -105,9 +123,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id],
     user: {
       id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
+      email: getEmail(req.cookies["id"])
     }
   };
   res.render("pages/urls_show", templateVars);
@@ -119,13 +135,12 @@ app.get("/urls/:id/delete", (req, res) => {
 
   // TODO check to see what happens if URL not there and handle
   delete urlDatabase[shortURL];
+
   let templateVars = {
     urls: urlDatabase,
     user: {
       id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
+      email: getEmail(req.cookies["id"])
     }
   };
 
@@ -148,9 +163,7 @@ app.get("/about", function(req, res) {
   let templateVars = {
     user: {
       id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
+      email: getEmail(req.cookies["id"])
     }
   };
 
@@ -161,17 +174,49 @@ app.get("/about", function(req, res) {
 // returns a page with an email address and a password.
 app.get("/register", function(req, res) {
   //TODO should we be registering if we have an existing user? Maybe make them logout first
+  res.clearCookie("id");
   let templateVars = {
     user: {
-      id: req.cookies["id"],
-      email: req.cookies["email"],
-      // TODO check to see whether we should be passing the password?
-      password: req.cookies["password"]
-    }
+      id: "",
+      email: ""
+    },
+    error: ""
   };
   res.render("pages/register", templateVars);
 });
 
+// GET /login - Login page for a user
+// Posts /login for verification
+app.get("/login", function(req, res) {
+  //TODO should we be registering if we have an existing user? Maybe make them logout first
+  let templateVars = {
+    user: {
+      id: "",
+      email: ""
+    },
+    error: ""
+  };
+  res.render("pages/login", templateVars);
+});
+
+// GET /logout - from any header
+// Delete the cookie, go back to /urls
+app.get("/logout", (req, res) => {
+  //TODO check parameters
+
+  console.log("logout");
+
+  res.clearCookie("id");
+  let templateVars = {
+    user: {
+      id: "",
+      email: ""
+    },
+    error: "Logged out."
+  };
+
+  res.render("pages/login", templateVars);
+});
 // POSTS
 
 // POST /urls when we get a new tiny URL from /urls/new
@@ -197,25 +242,33 @@ app.post("/urls/:id/change", (req, res) => {
 app.post("/login", (req, res) => {
   //TODO check parameters
 
+  const userID = validUser(req.body.inputEmail, req.body.inputPassword);
+
   //TODO check that name is not empty
-  res.cookie("username", req.body.userID);
+  if (!userID) {
+    // delete the cookie
+    res.clearCookie("id");
+    let templateVars = {
+      user: {
+        id: "",
+        email: ""
+      },
+      error: "Invalid email or password."
+    };
+    res.render("pages/login", templateVars);
+    return;
+  }
+  let templateVars = {
+    urls: urlDatabase,
+    user: {
+      id: userID,
+      email: getEmail(userID)
+    },
+    error: ""
+  };
+  res.cookie("id", userID);
 
-  res.redirect("/urls");
-});
-
-// POST /logout - from any header
-// Delete the cookie, go back to /urls
-app.post("/logout", (req, res) => {
-  //TODO check parameters
-
-  console.log("logout");
-  //TODO check that current cookie is not empty
-  
-  res.clearCookie("id");
-  res.clearCookie("password");
-  res.clearCookie("email");
-
-  res.redirect("/urls");
+  res.render("pages/urls_index", templateVars);
 });
 
 // POST /register - Add a new user
@@ -245,18 +298,58 @@ app.post("/register", function(req, res) {
   }
 
   //  TODO   check that the key is not a duplicate. or make that part of generateRandomString?
-  let newUserID = generateRandomString(tinyURLLength);
+  let newuserID = generateRandomString(tinyURLLength);
 
-  users[newUserID] = {
-    id: newUserID,
+  users[newuserID] = {
+    id: newuserID,
     email: newEmail,
     password: newPassword
   };
 
   // Set the cookie
-  res.cookie("id", newUserID);
-  res.cookie("email", newEmail);
-  res.cookie("password", newPassword);
+  res.cookie("id", newuserID);
+
+  //Redict back to main page to show the user their URLs.
+  res.redirect("/urls");
+});
+
+// POST /login - login a user
+app.post("/login", function(req, res) {
+  let newEmail = req.body.inputEmail;
+  let newPassword = req.body.inputPassword;
+
+  // If the e-mail or password are empty strings, send back a response with the 400 status code.
+  if (!newEmail || !newPassword) {
+    res
+      .status(400)
+      .send(
+        !newEmail
+          ? "You need a valid email address."
+          : "You must enter a password."
+      );
+    return;
+  }
+
+  //TODO If someone tries to register with an existing user's email, send back a response with the 400 status code.
+  for (const key in users) {
+    if (users[key].email == newEmail) {
+      res.status(400).send("Invalid password ");
+      res.redirect("/login");
+      return;
+    }
+  }
+
+  //  TODO   check that the key is not a duplicate. or make that part of generateRandomString?
+  let newuserID = generateRandomString(tinyURLLength);
+
+  users[newuserID] = {
+    id: newuserID,
+    email: newEmail,
+    password: newPassword
+  };
+
+  // Set the cookie
+  res.cookie("id", newuserID);
 
   //Redict back to main page to show the user their URLs.
   res.redirect("/urls");
