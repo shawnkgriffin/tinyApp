@@ -4,6 +4,7 @@
   "description": "A full stack web tool built with node and express that allows users to shorten urls. ",
   "main": "index.js",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.7",

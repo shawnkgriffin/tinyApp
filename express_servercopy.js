@@ -14,26 +14,6 @@ app.set("view engine", "ejs");
 
 var PORT = process.env.PORT || 8080; // default port 8080
 
-//GLOBALS
-// Temporary database.
-const tinyURLLength = 6;
-var urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
-// Functions and other worker items remember to refactor these to a module.
-
-// generate length random alphanumeric characters
-function generateRandomString(length) {
-  const validChars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let random = "";
-  for (let i = 0; i < length; i++) {
-    random += validChars[Math.floor(Math.random() * validChars.length)];
-  }
-  return random;
-}
 
 // GET /login - Login page for a user
 // Posts /login for verification
@@ -48,41 +28,38 @@ app.get("/login", function(req, res) {
   };
   res.render("pages/login", templateVars);
 });
-
-// POST /login - from form in header if user is not logged in
-// Creates cookie for user
-app.post("/login", (req, res) => {
-  //TODO check parameters
-
-  const userID = myDatabase.validUser(req.body.inputEmail, req.body.inputPassword);
-
-  //TODO check that name is not empty
-  if (!userID) {
-    // delete the cookie
-    res.clearCookie("id");
+// POST /login - login a user
+app.post("/login", function(req, res) {
+  let newUserID = myDatabase.validUser(
+    req.body.inputEmail,
+    req.body.inputPassword
+  );
+  // If the e-mail or password are empty strings, send back a response with the 400 status code.
+  if (!newUserID) {
     let templateVars = {
       user: {
         id: "",
         email: ""
       },
-      error: "Invalid email or password."
+      error: "You need a valid email address and password to login."
     };
     res.render("pages/login", templateVars);
     return;
   }
- // TODO refactor as we do this a lot. 
   let templateVars = {
-    urls: urlDatabase,
+    urls: myDatabase.getURLS( newUserID),
     user: {
-      id: userID,
-      email: myDatabase.getEmail(userID)
+      id: newUserID,
+      email: myDatabase.getEmail(newUserID)
     },
     error: ""
   };
-  res.cookie("id", userID);
+  res.cookie("id", newUserID);
 
   res.render("pages/urls_index", templateVars);
 });
+
+
 
 // POST /register - Add a new user
 // returns a page with an email address and a password.
@@ -99,35 +76,12 @@ app.post("/register", function(req, res) {
   res.redirect("/urls");
 });
 
-// POST /login - login a user
-app.post("/login", function(req, res) {
-  let newUserID = myDatabase.validUser(
-    req.body.inputEmail,
-    req.body.inputEmail
-  );
-  // If the e-mail or password are empty strings, send back a response with the 400 status code.
-  if (!newUserID) {
-    let templateVars = {
-      user: {
-        id: "",
-        email: ""
-      },
-      error: "You need a valid email address and password to login."
-    };
-    res.render("pages/login", templateVars);
-  }
-  // Set the cookie
-  res.cookie("id", newUserID);
-
-  //Redict back to main page to show the user their URLs.
-  res.redirect("/urls");
-});
 
 // GET /register - Add a new user
 // returns a page with an email address and a password.
 app.get("/register", function(req, res) {
   //TODO should we be registering if we have an existing user? Maybe make them logout first
-  res.clearCookie("id");
+  //check to see if we should force the user to logout if there is an existing cookie.
   let templateVars = {
     user: {
       id: "",
@@ -139,32 +93,32 @@ app.get("/register", function(req, res) {
 });
 
 // Set up a router in front to redirect any pages to Login if you are not logged in.
-app.use(function(req, res, next) {
-  let userID = req.cookies["id"];
-  if (userID) {
-    console.log("Got next");
-    next();
-  } else {
-    let templateVars = {
-      user: {
-        id: "",
-        email: ""
-      },
-      error: ""
-    };
-    res.render("pages/login", templateVars);
-  }
-});
+// app.use(function(req, res, next) {
+//   let userID = req.cookies["id"];
+//   if (userID) {
+//     console.log("Got next");
+//     next();
+//   } else {
+//     let templateVars = {
+//       user: {
+//         id: "",
+//         email: ""
+//       },
+//       error: ""
+//     };
+//     res.render("pages/login", templateVars);
+//   }
+// });
 
 // GET HANDLERS
 // use res.render to load up an ejs view file
 // GET /
 app.get("/", (req, res) => {
   // Cookies check
-  console.log("Cookies: ", req.cookies.id);
+  console.log("Cookies: ", req.cookies["id"]);
 
   let templateVars = {
-    urls: urlDatabase,
+    urls: myDatabase.getURLS(req.cookies["id"]),
     user: {
       id: req.cookies["id"],
       email: myDatabase.getEmail(req.cookies["id"])
@@ -178,7 +132,7 @@ app.get("/", (req, res) => {
 // GET /URLS
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlDatabase,
+    urls: myDatabase.getURLS(req.cookies["id"]),
     user: {
       id: req.cookies["id"],
       email: myDatabase.getEmail(req.cookies["id"])
@@ -191,7 +145,7 @@ app.get("/urls", (req, res) => {
 // User wants to get a new small URL
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    urls: urlDatabase,
+    urls: myDatabase.getURLS(req.cookies["id"]),
     user: {
       id: req.cookies["id"],
       email: myDatabase.getEmail(req.cookies["id"])
@@ -205,7 +159,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: myDatabase.getLongURL( req.cookies["id"],req.params.id),
     user: {
       id: req.cookies["id"],
       email: myDatabase.getEmail(req.cookies["id"])
@@ -214,15 +168,16 @@ app.get("/urls/:id", (req, res) => {
   res.render("pages/urls_show", templateVars);
 });
 
+
 //Delete the URL at shortURL :id
 app.get("/urls/:id/delete", (req, res) => {
   let shortURL = req.params.id;
 
   // TODO check to see what happens if URL not there and handle
-  delete urlDatabase[shortURL];
+  myDatabase.deleteShortURL(req.cookies["id"],shortURL);
 
   let templateVars = {
-    urls: urlDatabase,
+    urls: myDatabase.getURLS(req.cookies["id"]),
     user: {
       id: req.cookies["id"],
       email: myDatabase.getEmail(req.cookies["id"])
@@ -232,16 +187,7 @@ app.get("/urls/:id/delete", (req, res) => {
   res.render("pages/urls_index", templateVars);
 });
 
-//GET /u/:shortURL do the redirection to the longURL
-app.get("/u/:shortURL", (req, res) => {
-  //TODO Check parameters
-  // What would happen if a client requests a non-existent shortURL?
-  // What happens to the urlDatabase when the server is restarted?
-  // Should your redirects be 301 or 302 - What is the difference?
 
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
-});
 
 // GET /about - Added an About page for fun.
 app.get("/about", function(req, res) {
@@ -273,22 +219,33 @@ app.get("/logout", (req, res) => {
 
   res.render("pages/login", templateVars);
 });
+
+//GET /:shortURL do the redirection to the longURL
+app.get("/:shortURL", (req, res) => {
+  //TODO Check parameters
+  // What would happen if a client requests a non-existent shortURL?
+  // What happens to the urlDatabase when the server is restarted?
+  // Should your redirects be 301 or 302 - What is the difference?
+
+  let longURL = myDatabase.getLongURL("", req.params.shortURL);
+  res.redirect(longURL);
+});
 // POSTS
 
 // POST /urls when we get a new tiny URL from /urls/new
 // create a random string (key) then redirect to /urls/key to allow user to view or change.
 app.post("/urls", (req, res) => {
-  const key = generateRandomString(tinyURLLength);
-  urlDatabase[key] = "http://" + req.body.longURL;
+  
+  const myShortURL = myDatabase.createShortURL(req.cookies["id"],req.body.longURL) ;
 
-  res.redirect("/urls/" + key);
+  res.redirect("/");
 });
 
 // POST /urls/:id/change when we change a URL from urls/:id
 // change the Long URL to point to the new one.
 app.post("/urls/:id/change", (req, res) => {
   //TODO check parameters verify that req.params.id is valid
-  urlDatabase[req.params.id] = req.body.newLongURL;
+  myDatabase.updateShortURL( req.cookies["id"], req.params.id, req.body.newLongURL);
 
   res.redirect("/");
 });
