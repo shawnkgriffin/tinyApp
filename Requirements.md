@@ -124,7 +124,7 @@ if user is not logged in:
 if email and password params don't match an existing user:
 - [X]  returns HTML with a relevant error message
 ## POST /register
-- [X]  
+ 
 if email or password are empty:
 - [X]  returns HTML with a relevant error message
 if email already exists:
