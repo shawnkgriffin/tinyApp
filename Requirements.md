@@ -22,7 +22,7 @@ if a user is not logged in, the header shows:
 - [X]  a link to the registration page (/register)
 # Behaviour Requirements
 ## GET /
-- [ ] 
+
 if user is logged in:
 - [X]  (Minor) redirect to /urls
 if user is not logged in:
@@ -61,8 +61,8 @@ if user is logged in and owns the URL for the given ID:
 - [X]  a form which contains:
 - [X]  the corresponding long URL
 - [X]  an update button which makes a POST request to /urls/:id
-- [ ] (Stretch) the date the short URL was created
-- [ ] (Stretch) the number of times the short URL was visited
+- [X] (Stretch) the date the short URL was created
+- [X] (Stretch) the number of times the short URL was visited
 - [ ] (Stretch) the number of unique visits for the short URL
 if a URL for the given ID does not exist:
 - [ ] (Minor) returns HTML with a relevant error message
@@ -81,7 +81,7 @@ if URL for the given ID does not exist:
 if user is logged in:
 - [X]  generates a short URL, saves it, and associates it with the user
 - [X]  redirects to /urls/:id, where :id matches the ID of the newly saved URL
-- [ ] if user is not logged in:
+if user is not logged in:
 - [ ] (Minor) returns HTML with a relevant error message
 ## POST /urls/:id
 
@@ -104,7 +104,7 @@ if user is logged it but does not own the URL for the given ID:
 if user is logged in:
 - [X]  (Minor) redirects to /urls
 -if user is not logged in:
-- [ ] returns HTML with:
+- [X] returns HTML with:
 - [X]  a form which contains:
 - [X]  input fields for email and password
 - [X]  submit button that makes a POST request to /login
