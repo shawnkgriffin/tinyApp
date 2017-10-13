@@ -111,29 +111,27 @@ app.get("/register", function(req, res) {
 });
 
 // Set up a router in front to redirect any pages to Login if you are not logged in.
-// app.use(function(req, res, next) {
-//   let userID = req.session.userID;
-//   if (userID) {
-//     console.log("Got next");
-//     next();
-//   } else {
-//     let templateVars = {
-//       user: {
-//         id: "",
-//         email: ""
-//       },
-//       error: ""
-//     };
-//     res.render("pages/login", templateVars);
-//   }
-// });
+app.use(function(req, res, next) {
+  let userID = req.session.userID;
+  const email =  myDatabase.getEmail(req.session.userID)
+  if (email) {
+    next();
+  } else {
+    let templateVars = {
+      user: {
+        id: "",
+        email: ""
+      },
+      error: ""
+    };
+    res.render("pages/login", templateVars);
+  }
+});
 
 // GET HANDLERS
 // use res.render to load up an ejs view file
 // GET /
 app.get("/", (req, res) => {
-  // Cookies check
-  console.log("Cookies: ", req.session.userID);
 
   let templateVars = {
     urls: myDatabase.getURLS(req.session.userID),
@@ -221,9 +219,6 @@ app.get("/about", function(req, res) {
 app.get("/logout", (req, res) => {
   //TODO check parameters
 
-  console.log("logout");
-
-  res.clearCookie("id");
   let templateVars = {
     user: {
       id: "",
@@ -231,6 +226,7 @@ app.get("/logout", (req, res) => {
     },
     error: "Logged out."
   };
+  req.session.userID = "";
 
   res.render("pages/login", templateVars);
 });
@@ -272,4 +268,4 @@ app.post("/urls/:id/change", (req, res) => {
 });
 
 app.listen(8080);
-console.log("8080 is the magic port");
+console.log("8080 and up");

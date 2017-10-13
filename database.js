@@ -89,6 +89,9 @@ function validUser(email, password) {
 // (userID) => email (string) undefined if not found.
 
 function getEmail(userID) {
+  if (users[userID] == undefined) {
+    return "";
+  }
   return !!userID ? users[userID].email : "";
 }
 
@@ -112,15 +115,15 @@ function getURLS(userID) {
   return returnURLS;
 }
 function getLongURL(userID, shortURL) {
-  
   //TODO Should check against the userid
   // for (var key in urlDatabase) {
   //   if ((urlDatabase[key].userID == userID) && (key == shortURL) {
   //     returnURL = urlDatabase[key].longURL;
   //   }
   // }
-  const returnURL = (urlDatabase[shortURL] === undefined) ? "" : urlDatabase[shortURL].longURL;
-  
+  const returnURL =
+    urlDatabase[shortURL] === undefined ? "" : urlDatabase[shortURL].longURL;
+
   return returnURL;
 }
 
