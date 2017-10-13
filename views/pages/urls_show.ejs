@@ -13,17 +13,31 @@
 
 <main>
     <div class="jumbotron">
-    <h2>Your Short URL is <%=URL.shortURL%></h2>
+    <h2>Editing your Short URL <%=URL.shortURL%></h2>
+    <div class="bs-example" data-example-id="striped-table"> 
+  <table class="table table-striped"> 
+  <thead> 
+  <tr> <th>Short URL</th> <th>Full URL</th><th>Created</th><th>Your Use</th><th>Total</th> </tr> 
+  </thead> 
+  <tbody>  
+  <tr class="danger">
+    <td><%=URL.shortURL%></td> 
+    <td><%=URL.longURL%></td> 
     <% var dateString = URL.dateCreated.toDateString();%>
-          <h3>Created :<%=dateString%></h3> 
-          <h3>Your use :<%=URL.ownerHits%></h3> 
-          <h3>Total use :<%=URL.totalHits%></h3> 
-    
-  <form action="/urls/<%=URL.shortURL%>/change" method="POST" style="margin:0px;">
-          <label for="longURL">Change if you want a different URL or press OK:</label>
+    <td><%=dateString%></td> 
+    <td><%=URL.ownerHits%></td> 
+    <td><%=URL.totalHits%></td> 
+    <td> <button type="button" onclick="window.location.href='<%=URL.longURL%>'" class="btn btn-primary btn-xs">Test</button></td>
+    <td> <button type="button" onclick="window.location.href='http://localhost:8080/urls/<%=URL.shortURL%>/delete'" class="btn btn-danger btn-xs">Delete</button></td>
+    </tr>
+    <form action="/urls/<%=URL.shortURL%>/change" method="POST" style="margin:0px;">
+          <label for="longURL">Change to a new URL :</label>
           <input id="longURL" type="text" name="newLongURL" value=<%=URL.longURL%> style="width: 300px">
           <input type="submit" value="OK">
         </form>
+    </tbody> 
+   </table> 
+   
   </main>
 
 <footer>

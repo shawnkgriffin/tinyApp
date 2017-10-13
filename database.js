@@ -159,6 +159,9 @@ function updateShortURL(userID, shortURL, longURL) {
 
 function deleteShortURL(userID, shortURL) {
   //TODO add parameter checking
+  if (urlDatabase[shortURL] === undefined) {
+    return false;
+  }
   if (urlDatabase[shortURL].userID == userID) {
     delete urlDatabase[shortURL];
   }
