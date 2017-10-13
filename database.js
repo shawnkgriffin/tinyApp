@@ -60,7 +60,6 @@ function addUser(newEmail, newPassword) {
   }
   const newuserID = generateRandomString(tinyURLLength);
   const hash = bcrypt.hashSync(newPassword, 10);
-  console.log("hash", hash);
 
   users[newuserID] = {
     id: newuserID,

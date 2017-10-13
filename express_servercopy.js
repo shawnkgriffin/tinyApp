@@ -53,13 +53,6 @@ app.post("/login", function(req, res) {
   );
   // If the e-mail or password are empty strings, send back a response with the 400 status code.
   if (!newUserID) {
-    let templateVars = {
-      user: {
-        id: "",
-        email: ""
-      },
-      error: "You need a valid email address and password to login."
-    };
     res.render(
       "pages/login",
       setTemplateVars(
@@ -71,15 +64,8 @@ app.post("/login", function(req, res) {
     );
     return;
   }
-  let templateVars = {
-    urls: myDatabase.getURLS(newUserID),
-    user: {
-      id: newUserID,
-      email: myDatabase.getEmail(newUserID)
-    },
-    error: ""
-  };
-  //res.cookie("id", newUserID);
+
+  //Set the cookie for the session
   req.session.userID = newUserID;
 
   res.render(
@@ -101,13 +87,6 @@ app.post("/register", function(req, res) {
     req.body.inputPassword
   );
   if (!newUserID) {
-    let templateVars = {
-      user: {
-        id: "",
-        email: ""
-      },
-      error: "Cannot register again, please login."
-    };
     res.render(
       "pages/login",
       setTemplateVars({}, "", "", "Cannot register again, please login.")
@@ -115,7 +94,6 @@ app.post("/register", function(req, res) {
     return;
   }
   // Set the cookie
-  //res.cookie("id", newuserID);
   req.session.userID = newUserID;
 
   //Redict back to main page to show the user their URLs.
@@ -127,13 +105,7 @@ app.post("/register", function(req, res) {
 app.get("/register", function(req, res) {
   //TODO should we be registering if we have an existing user? Maybe make them logout first
   //check to see if we should force the user to logout if there is an existing cookie.
-  let templateVars = {
-    user: {
-      id: "",
-      email: ""
-    },
-    error: ""
-  };
+
   res.render("pages/register", setTemplateVars({}, "", "", ""));
 });
 
@@ -144,13 +116,6 @@ app.use(function(req, res, next) {
   if (email) {
     next();
   } else {
-    let templateVars = {
-      user: {
-        id: "",
-        email: ""
-      },
-      error: ""
-    };
     res.render("pages/login", setTemplateVars({}, "", "", ""));
   }
 });
@@ -159,14 +124,6 @@ app.use(function(req, res, next) {
 // use res.render to load up an ejs view file
 // GET /
 app.get("/", (req, res) => {
-  let templateVars = {
-    urls: myDatabase.getURLS(req.session.userID),
-    user: {
-      id: req.session.userID,
-      email: myDatabase.getEmail(req.session.userID)
-    }
-  };
-
   // render to main page that shows all URLS
   res.render(
     "pages/urls_index",
@@ -181,13 +138,6 @@ app.get("/", (req, res) => {
 
 // GET /URLS
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: myDatabase.getURLS(req.session.userID),
-    user: {
-      id: req.session.userID,
-      email: myDatabase.getEmail(req.session.userID)
-    }
-  };
   res.render(
     "pages/urls_index",
     setTemplateVars(
@@ -202,14 +152,6 @@ app.get("/urls", (req, res) => {
 // GET URLS/NEW
 // User wants to get a new small URL
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    urls: myDatabase.getURLS(req.session.userID),
-    user: {
-      id: req.session.userID,
-      email: myDatabase.getEmail(req.session.userID)
-    }
-  };
-
   res.render(
     "pages/urls_new",
     setTemplateVars(
@@ -223,6 +165,7 @@ app.get("/urls/new", (req, res) => {
 
 //show the URL and allow the user to change the URL.
 app.get("/urls/:id", (req, res) => {
+  //TODO can't use setTemplateVars here as we add shortURL and longURL to the mix refactor to user them as URL.
   let templateVars = {
     shortURL: req.params.id,
     longURL: myDatabase.getLongURL(req.session.userID, req.params.id),
@@ -236,18 +179,8 @@ app.get("/urls/:id", (req, res) => {
 
 //Delete the URL at shortURL :id
 app.get("/urls/:id/delete", (req, res) => {
-  let shortURL = req.params.id;
-
   // TODO check to see what happens if URL not there and handle
-  myDatabase.deleteShortURL(req.session.userID, shortURL);
-
-  let templateVars = {
-    urls: myDatabase.getURLS(req.session.userID),
-    user: {
-      id: req.session.userID,
-      email: myDatabase.getEmail(req.session.userID)
-    }
-  };
+  myDatabase.deleteShortURL(req.session.userID, req.params.id);
 
   res.render(
     "pages/urls_index",
@@ -262,13 +195,6 @@ app.get("/urls/:id/delete", (req, res) => {
 
 // GET /about - Added an About page for fun.
 app.get("/about", function(req, res) {
-  let templateVars = {
-    user: {
-      id: req.session.userID,
-      email: myDatabase.getEmail(req.session.userID)
-    }
-  };
-
   res.render(
     "pages/about",
     setTemplateVars(
@@ -285,13 +211,6 @@ app.get("/about", function(req, res) {
 app.get("/logout", (req, res) => {
   //TODO check parameters
 
-  let templateVars = {
-    user: {
-      id: "",
-      email: ""
-    },
-    error: "Logged out."
-  };
   req.session.userID = "";
 
   res.render("pages/login", setTemplateVars({}, "", "", ""));
@@ -305,6 +224,7 @@ app.get("/:shortURL", (req, res) => {
   // Should your redirects be 301 or 302 - What is the difference?
 
   let longURL = myDatabase.getLongURL("", req.params.shortURL);
+
   res.redirect(longURL);
 });
 // POSTS
@@ -316,7 +236,6 @@ app.post("/urls", (req, res) => {
     req.session.userID,
     req.body.longURL
   );
-
   res.redirect("/");
 });
 
