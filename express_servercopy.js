@@ -1,19 +1,28 @@
 //"uses strict"
 //requires
 const bodyParser = require("body-parser");
+var cookieSession = require("cookie-session");
 var express = require("express");
-var cookieParser = require("cookie-parser");
 var myDatabase = require("./database");
 
 //start up express, set up the components we are using.
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+
 // set the view engine to ejs
 app.set("view engine", "ejs");
 
 var PORT = process.env.PORT || 8080; // default port 8080
 
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["key1", "key2"],
+
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  })
+);
 
 // GET /login - Login page for a user
 // Posts /login for verification
@@ -47,35 +56,44 @@ app.post("/login", function(req, res) {
     return;
   }
   let templateVars = {
-    urls: myDatabase.getURLS( newUserID),
+    urls: myDatabase.getURLS(newUserID),
     user: {
       id: newUserID,
       email: myDatabase.getEmail(newUserID)
     },
     error: ""
   };
-  res.cookie("id", newUserID);
+  //res.cookie("id", newUserID);
+  req.session.userID = newUserID;
 
   res.render("pages/urls_index", templateVars);
 });
 
-
-
 // POST /register - Add a new user
 // returns a page with an email address and a password.
 app.post("/register", function(req, res) {
-  let newuserID = myDatabase.addUser(
+  let newUserID = myDatabase.addUser(
     req.body.inputEmail,
     req.body.inputPassword
   );
-
+  if (!newUserID) {
+    let templateVars = {
+      user: {
+        id: "",
+        email: ""
+      },
+      error: "Cannot register again, please login."
+    };
+    res.render("pages/login", templateVars);
+    return;
+  }
   // Set the cookie
-  res.cookie("id", newuserID);
-
+  //res.cookie("id", newuserID);
+  req.session.userID = newUserID;
+  
   //Redict back to main page to show the user their URLs.
   res.redirect("/urls");
 });
-
 
 // GET /register - Add a new user
 // returns a page with an email address and a password.
@@ -94,7 +112,7 @@ app.get("/register", function(req, res) {
 
 // Set up a router in front to redirect any pages to Login if you are not logged in.
 // app.use(function(req, res, next) {
-//   let userID = req.cookies["id"];
+//   let userID = req.session.userID;
 //   if (userID) {
 //     console.log("Got next");
 //     next();
@@ -115,13 +133,13 @@ app.get("/register", function(req, res) {
 // GET /
 app.get("/", (req, res) => {
   // Cookies check
-  console.log("Cookies: ", req.cookies["id"]);
+  console.log("Cookies: ", req.session.userID);
 
   let templateVars = {
-    urls: myDatabase.getURLS(req.cookies["id"]),
+    urls: myDatabase.getURLS(req.session.userID),
     user: {
-      id: req.cookies["id"],
-      email: myDatabase.getEmail(req.cookies["id"])
+      id: req.session.userID,
+      email: myDatabase.getEmail(req.session.userID)
     }
   };
 
@@ -132,10 +150,10 @@ app.get("/", (req, res) => {
 // GET /URLS
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: myDatabase.getURLS(req.cookies["id"]),
+    urls: myDatabase.getURLS(req.session.userID),
     user: {
-      id: req.cookies["id"],
-      email: myDatabase.getEmail(req.cookies["id"])
+      id: req.session.userID,
+      email: myDatabase.getEmail(req.session.userID)
     }
   };
   res.render("pages/urls_index", templateVars);
@@ -145,10 +163,10 @@ app.get("/urls", (req, res) => {
 // User wants to get a new small URL
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    urls: myDatabase.getURLS(req.cookies["id"]),
+    urls: myDatabase.getURLS(req.session.userID),
     user: {
-      id: req.cookies["id"],
-      email: myDatabase.getEmail(req.cookies["id"])
+      id: req.session.userID,
+      email: myDatabase.getEmail(req.session.userID)
     }
   };
 
@@ -159,42 +177,39 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL: myDatabase.getLongURL( req.cookies["id"],req.params.id),
+    longURL: myDatabase.getLongURL(req.session.userID, req.params.id),
     user: {
-      id: req.cookies["id"],
-      email: myDatabase.getEmail(req.cookies["id"])
+      id: req.session.userID,
+      email: myDatabase.getEmail(req.session.userID)
     }
   };
   res.render("pages/urls_show", templateVars);
 });
-
 
 //Delete the URL at shortURL :id
 app.get("/urls/:id/delete", (req, res) => {
   let shortURL = req.params.id;
 
   // TODO check to see what happens if URL not there and handle
-  myDatabase.deleteShortURL(req.cookies["id"],shortURL);
+  myDatabase.deleteShortURL(req.session.userID, shortURL);
 
   let templateVars = {
-    urls: myDatabase.getURLS(req.cookies["id"]),
+    urls: myDatabase.getURLS(req.session.userID),
     user: {
-      id: req.cookies["id"],
-      email: myDatabase.getEmail(req.cookies["id"])
+      id: req.session.userID,
+      email: myDatabase.getEmail(req.session.userID)
     }
   };
 
   res.render("pages/urls_index", templateVars);
 });
 
-
-
 // GET /about - Added an About page for fun.
 app.get("/about", function(req, res) {
   let templateVars = {
     user: {
-      id: req.cookies["id"],
-      email: myDatabase.getEmail(req.cookies["id"])
+      id: req.session.userID,
+      email: myDatabase.getEmail(req.session.userID)
     }
   };
 
@@ -235,8 +250,10 @@ app.get("/:shortURL", (req, res) => {
 // POST /urls when we get a new tiny URL from /urls/new
 // create a random string (key) then redirect to /urls/key to allow user to view or change.
 app.post("/urls", (req, res) => {
-  
-  const myShortURL = myDatabase.createShortURL(req.cookies["id"],req.body.longURL) ;
+  const myShortURL = myDatabase.createShortURL(
+    req.session.userID,
+    req.body.longURL
+  );
 
   res.redirect("/");
 });
@@ -245,7 +262,11 @@ app.post("/urls", (req, res) => {
 // change the Long URL to point to the new one.
 app.post("/urls/:id/change", (req, res) => {
   //TODO check parameters verify that req.params.id is valid
-  myDatabase.updateShortURL( req.cookies["id"], req.params.id, req.body.newLongURL);
+  myDatabase.updateShortURL(
+    req.session.userID,
+    req.params.id,
+    req.body.newLongURL
+  );
 
   res.redirect("/");
 });
