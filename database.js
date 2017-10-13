@@ -7,24 +7,27 @@ const bcrypt = require("bcrypt");
 const tinyURLLength = 6;
 var urlDatabase = {
   b2xVn2: {
+    shortURL : "b2xVn2",
     longURL: "http://www.lighthouselabs.ca",
     userID: "asdfas",
     dateCreated : new Date(2017, 9, 24, 8, 45),
-    anonymousHits : 0,
+    totalHits : 0,
     ownerHits : 0
   },
   "9sm5xK": {
+    shortURL : "9sm5xK",
     longURL: "http://www.google.com",
     userID: "userRandomID",
     dateCreated : new Date(1991, 9, 24, 8, 45),
-    anonymousHits : 0,
+    totalHits : 0,
     ownerHits : 0
   },
   ssddd: {
+    shortURL : "ssddd",
     longURL: "http://www.google.com",
     userID: "asdfas",
     dateCreated : new Date(1993, 11, 15, 8, 45),
-    anonymousHits : 0,
+    totalHits : 0,
     ownerHits : 0
   }
 };
@@ -106,15 +109,17 @@ function getEmail(userID) {
 function createShortURL(userID, longURL) {
   const shortURL = generateRandomString(tinyURLLength);
   urlDatabase[shortURL] = {
+    shortURL : shortURL,
     userID: userID,
     longURL: longURL,
     dateCreated :  new Date(),
-    anonymousHits : 0,
+    totalHits : 0,
     ownerHits : 0
   };
   return shortURL;
 }
 
+// Return all the URLS for that user
 function getURLS(userID) {
   let returnURLS = {};
   for (var key in urlDatabase) {
@@ -125,6 +130,13 @@ function getURLS(userID) {
 
   return returnURLS;
 }
+
+//Just get a URL data structure for one short URL
+function getOneURL(shortURL) {
+  //TODO add checking if it is incorrect.
+  return urlDatabase[shortURL];
+}
+
 function getLongURL(userID, shortURL) {
   //TODO Should check against the userid
   // for (var key in urlDatabase) {
@@ -152,7 +164,12 @@ function deleteShortURL(userID, shortURL) {
   }
   return true;
 }
-
+function updateCounters(userID,shortURL) {
+  urlDatabase[shortURL].totalHits++;
+  if (!!userID) {
+    urlDatabase[shortURL].ownerHits++;
+  }
+}
 module.exports = {
   // User functions
   getEmail: getEmail,
@@ -162,5 +179,7 @@ module.exports = {
   getLongURL: getLongURL, //getLongURL(userID, shortURL)
   getURLS: getURLS, //function getURLS(userID)
   updateShortURL: updateShortURL, //  :  updateShortURL( userID, shortURL, longURL )
-  deleteShortURL: deleteShortURL // deleteShortURL(userID, shortURL)
+  deleteShortURL: deleteShortURL, // deleteShortURL(userID, shortURL)
+  getOneURL : getOneURL, //Just get one URL data structure getOneURL(shortURL)
+  updateCounters: updateCounters // updateCounters(userid,shortURL) 
 };

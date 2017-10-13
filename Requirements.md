@@ -37,7 +37,7 @@ if user is logged in:
 - [X]  an edit button which makes a GET request to /urls/:id
 - [X]  a delete button which makes a POST request to /urls/:id/delete
 - [X] (Stretch) the date the short URL was created
-- [ ] (Stretch) the number of times the short URL was visited
+- [X] (Stretch) the number of times the short URL was visited
 - [ ] (Stretch) the number of unique visits for the short URL
 - [X]  (Minor) a link to "Create a New Short Link" which makes a GET request to /urls/new
 if user is not logged in:

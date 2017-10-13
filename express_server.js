@@ -109,22 +109,21 @@ app.get("/register", function(req, res) {
   res.render("pages/register", setTemplateVars({}, "", "", ""));
 });
 
-
-
 // Set up a router in front to redirect any pages to Login if you are not logged in.
 app.use(function(req, res, next) {
   let userID = req.session.userID;
   const email = myDatabase.getEmail(req.session.userID);
-  
+
   // if longURL is valid then user (logged in or not, is trying to get to the longURL)
   let shortURL = req.originalUrl.substr(1); //remove the leading /
-  
+
   let longURL = myDatabase.getLongURL("", shortURL);
   if (!!longURL) {
     //redirect with 302 indicating that this is temporary redirection and could change
     res.redirect(302, longURL);
+    myDatabase.updateCounters(userID, shortURL);
     return;
-  } 
+  }
 
   if (email) {
     next();
@@ -180,8 +179,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   //TODO can't use setTemplateVars here as we add shortURL and longURL to the mix refactor to user them as URL.
   let templateVars = {
-    shortURL: req.params.id,
-    longURL: myDatabase.getLongURL(req.session.userID, req.params.id),
+    URL: myDatabase.getOneURL(req.params.id),
     user: {
       id: req.session.userID,
       email: myDatabase.getEmail(req.session.userID)
