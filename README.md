@@ -31,5 +31,5 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Issues
 
-- Code has not been refactored.
-- Error handling is weak and needs to be improved. 
+- Started refactoring. Much work to be done.
+- Error handling improved but needs to be better. 
