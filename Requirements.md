@@ -12,15 +12,15 @@ so that I can read interesting content.
 I want to be able to see how many times my subscribers visit my links 
 so that I can learn what content they like.
 
-#Display Requirements
+# Display Requirements
 - [X] Site Header:
-- [x] if a user is logged in, the header shows:
-- [ ] the user's email
+if a user is logged in, the header shows:
+- [X] the user's email
 - [X]  a logout button which makes a POST request to /logout
 if a user is not logged in, the header shows:
 - [X]  a link to the login page (/login)
 - [X]  a link to the registration page (/register)
-#Behaviour Requirements
+# Behaviour Requirements
 ## GET /
 - [ ] 
 if user is logged in:
