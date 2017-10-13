@@ -30,7 +30,7 @@
           <td><%=dateString%></td> 
           <td><%=urls[item].ownerHits%></td> 
           <td><%=urls[item].anonymousHits%></td> 
-          <td> <button type="button" onclick="window.location.href='<%-urls[item]%>'" class="btn btn-primary btn-xs">Test</button></td>
+          <td> <button type="button" onclick="window.location.href='<%-urls[item].longURL%>'" class="btn btn-primary btn-xs">Test</button></td>
             <td> <button type="button" onclick="window.location.href='http://localhost:8080/urls/<%-item%>'" class="btn btn-primary btn-xs">Edit</button></td>
            <td> <button type="button" onclick="window.location.href='http://localhost:8080/urls/<%-item%>/delete'" class="btn btn-danger btn-xs">Delete</button></td>
        </tr>
