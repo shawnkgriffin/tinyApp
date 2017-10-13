@@ -112,15 +112,15 @@ function getURLS(userID) {
   return returnURLS;
 }
 function getLongURL(userID, shortURL) {
-  let returnURL = "";
-
-  returnURL = urlDatabase[shortURL].longURL;
+  
   //TODO Should check against the userid
   // for (var key in urlDatabase) {
   //   if ((urlDatabase[key].userID == userID) && (key == shortURL) {
   //     returnURL = urlDatabase[key].longURL;
   //   }
   // }
+  const returnURL = (urlDatabase[shortURL] === undefined) ? "" : urlDatabase[shortURL].longURL;
+  
   return returnURL;
 }
 
