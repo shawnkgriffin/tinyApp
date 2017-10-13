@@ -24,19 +24,27 @@ app.use(
   })
 );
 
+//LOCAL Functions
+
+// Since we do this a lot, clean it up by writing a function
+function setTemplateVars(urls, userid, email, errorString) {
+  let templateVars = {
+    urls: urls,
+    user: {
+      id: userid,
+      email: email
+    },
+    error: errorString
+  };
+  return templateVars;
+}
+
 // GET /login - Login page for a user
 // Posts /login for verification
 app.get("/login", function(req, res) {
-  //TODO should we be registering if we have an existing user? Maybe make them logout first
-  let templateVars = {
-    user: {
-      id: "",
-      email: ""
-    },
-    error: ""
-  };
-  res.render("pages/login", templateVars);
+  res.render("pages/login", setTemplateVars({}, "", "", ""));
 });
+
 // POST /login - login a user
 app.post("/login", function(req, res) {
   let newUserID = myDatabase.validUser(
@@ -52,7 +60,15 @@ app.post("/login", function(req, res) {
       },
       error: "You need a valid email address and password to login."
     };
-    res.render("pages/login", templateVars);
+    res.render(
+      "pages/login",
+      setTemplateVars(
+        {},
+        "",
+        "",
+        "You need a valid email address and password to login."
+      )
+    );
     return;
   }
   let templateVars = {
@@ -66,7 +82,15 @@ app.post("/login", function(req, res) {
   //res.cookie("id", newUserID);
   req.session.userID = newUserID;
 
-  res.render("pages/urls_index", templateVars);
+  res.render(
+    "pages/urls_index",
+    setTemplateVars(
+      myDatabase.getURLS(newUserID),
+      newUserID,
+      myDatabase.getEmail(newUserID),
+      ""
+    )
+  );
 });
 
 // POST /register - Add a new user
@@ -84,13 +108,16 @@ app.post("/register", function(req, res) {
       },
       error: "Cannot register again, please login."
     };
-    res.render("pages/login", templateVars);
+    res.render(
+      "pages/login",
+      setTemplateVars({}, "", "", "Cannot register again, please login.")
+    );
     return;
   }
   // Set the cookie
   //res.cookie("id", newuserID);
   req.session.userID = newUserID;
-  
+
   //Redict back to main page to show the user their URLs.
   res.redirect("/urls");
 });
@@ -107,13 +134,13 @@ app.get("/register", function(req, res) {
     },
     error: ""
   };
-  res.render("pages/register", templateVars);
+  res.render("pages/register", setTemplateVars({}, "", "", ""));
 });
 
 // Set up a router in front to redirect any pages to Login if you are not logged in.
 app.use(function(req, res, next) {
   let userID = req.session.userID;
-  const email =  myDatabase.getEmail(req.session.userID)
+  const email = myDatabase.getEmail(req.session.userID);
   if (email) {
     next();
   } else {
@@ -124,7 +151,7 @@ app.use(function(req, res, next) {
       },
       error: ""
     };
-    res.render("pages/login", templateVars);
+    res.render("pages/login", setTemplateVars({}, "", "", ""));
   }
 });
 
@@ -132,7 +159,6 @@ app.use(function(req, res, next) {
 // use res.render to load up an ejs view file
 // GET /
 app.get("/", (req, res) => {
-
   let templateVars = {
     urls: myDatabase.getURLS(req.session.userID),
     user: {
@@ -142,7 +168,15 @@ app.get("/", (req, res) => {
   };
 
   // render to main page that shows all URLS
-  res.render("pages/urls_index", templateVars);
+  res.render(
+    "pages/urls_index",
+    setTemplateVars(
+      myDatabase.getURLS(req.session.userID),
+      req.session.userID,
+      myDatabase.getEmail(req.session.userID),
+      ""
+    )
+  );
 });
 
 // GET /URLS
@@ -154,7 +188,15 @@ app.get("/urls", (req, res) => {
       email: myDatabase.getEmail(req.session.userID)
     }
   };
-  res.render("pages/urls_index", templateVars);
+  res.render(
+    "pages/urls_index",
+    setTemplateVars(
+      myDatabase.getURLS(req.session.userID),
+      req.session.userID,
+      myDatabase.getEmail(req.session.userID),
+      ""
+    )
+  );
 });
 
 // GET URLS/NEW
@@ -168,7 +210,15 @@ app.get("/urls/new", (req, res) => {
     }
   };
 
-  res.render("pages/urls_new", templateVars);
+  res.render(
+    "pages/urls_new",
+    setTemplateVars(
+      myDatabase.getURLS(req.session.userID),
+      req.session.userID,
+      myDatabase.getEmail(req.session.userID),
+      ""
+    )
+  );
 });
 
 //show the URL and allow the user to change the URL.
@@ -199,7 +249,15 @@ app.get("/urls/:id/delete", (req, res) => {
     }
   };
 
-  res.render("pages/urls_index", templateVars);
+  res.render(
+    "pages/urls_index",
+    setTemplateVars(
+      myDatabase.getURLS(req.session.userID),
+      req.session.userID,
+      myDatabase.getEmail(req.session.userID),
+      ""
+    )
+  );
 });
 
 // GET /about - Added an About page for fun.
@@ -211,7 +269,15 @@ app.get("/about", function(req, res) {
     }
   };
 
-  res.render("pages/about", templateVars);
+  res.render(
+    "pages/about",
+    setTemplateVars(
+      myDatabase.getURLS(req.session.userID),
+      req.session.userID,
+      myDatabase.getEmail(req.session.userID),
+      ""
+    )
+  );
 });
 
 // GET /logout - from any header
@@ -228,7 +294,7 @@ app.get("/logout", (req, res) => {
   };
   req.session.userID = "";
 
-  res.render("pages/login", templateVars);
+  res.render("pages/login", setTemplateVars({}, "", "", ""));
 });
 
 //GET /:shortURL do the redirection to the longURL
