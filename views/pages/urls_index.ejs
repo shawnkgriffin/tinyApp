@@ -18,14 +18,18 @@
   <div class="bs-example" data-example-id="striped-table"> 
   <table class="table table-striped"> 
   <thead> 
-  <tr> <th>#</th> <th>Short URL</th> <th>Full URL</th> </tr> 
+  <tr> <th>#</th> <th>Short URL</th> <th>Full URL</th><th>Created</th><th>Your Use</th><th>Others</th> </tr> 
   </thead> 
   <% let i = 1;%>
   <tbody> 
   <% for (let item in urls ) { %>
           <tr> <th scope="row"><%=i%></th> 
           <td><%=item%></td> 
-          <td><%=urls[item]%></td> 
+          <td><%=urls[item].longURL%></td> 
+          <% var dateString = urls[item].dateCreated.toDateString();%>
+          <td><%=dateString%></td> 
+          <td><%=urls[item].ownerHits%></td> 
+          <td><%=urls[item].anonymousHits%></td> 
           <td> <button type="button" onclick="window.location.href='<%-urls[item]%>'" class="btn btn-primary btn-xs">Test</button></td>
             <td> <button type="button" onclick="window.location.href='http://localhost:8080/urls/<%-item%>'" class="btn btn-primary btn-xs">Edit</button></td>
            <td> <button type="button" onclick="window.location.href='http://localhost:8080/urls/<%-item%>/delete'" class="btn btn-danger btn-xs">Delete</button></td>

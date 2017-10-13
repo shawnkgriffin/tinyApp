@@ -8,15 +8,24 @@ const tinyURLLength = 6;
 var urlDatabase = {
   b2xVn2: {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "asdfas"
+    userID: "asdfas",
+    dateCreated : new Date(2017, 9, 24, 8, 45),
+    anonymousHits : 0,
+    ownerHits : 0
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
-    userID: "userRandomID"
+    userID: "userRandomID",
+    dateCreated : new Date(1991, 9, 24, 8, 45),
+    anonymousHits : 0,
+    ownerHits : 0
   },
   ssddd: {
     longURL: "http://www.google.com",
-    userID: "asdfas"
+    userID: "asdfas",
+    dateCreated : new Date(1993, 11, 15, 8, 45),
+    anonymousHits : 0,
+    ownerHits : 0
   }
 };
 
@@ -98,7 +107,10 @@ function createShortURL(userID, longURL) {
   const shortURL = generateRandomString(tinyURLLength);
   urlDatabase[shortURL] = {
     userID: userID,
-    longURL: longURL
+    longURL: longURL,
+    dateCreated :  new Date(),
+    anonymousHits : 0,
+    ownerHits : 0
   };
   return shortURL;
 }
@@ -107,7 +119,7 @@ function getURLS(userID) {
   let returnURLS = {};
   for (var key in urlDatabase) {
     if (urlDatabase[key].userID == userID) {
-      returnURLS[key] = urlDatabase[key].longURL;
+      returnURLS[key] = urlDatabase[key];
     }
   }
 
