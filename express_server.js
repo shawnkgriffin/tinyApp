@@ -109,6 +109,21 @@ app.get("/register", function(req, res) {
   res.render("pages/register", setTemplateVars({}, "", "", ""));
 });
 
+//If the user enters /u/shortURL go to the long URL.
+app.get("/u/:id", (req, res) => {
+  // if longURL is valid then user (logged in or not, is trying to get to the longURL)
+  let shortURL = req.params.id; //remove the leading /
+
+  let longURL = myDatabase.getLongURL("", shortURL);
+  
+  if (longURL) {
+    //redirect with 302 indicating that this is temporary redirection and could change
+    res.redirect(302, longURL);
+    myDatabase.updateCounters(req.session.userID, shortURL);
+  } else {
+    res.sendStatus(404);
+  }
+});
 // Set up a router in front to redirect any pages to Login if you are not logged in.
 app.use(function(req, res, next) {
   let userID = req.session.userID;
@@ -187,6 +202,7 @@ app.get("/urls/:id", (req, res) => {
   };
   res.render("pages/urls_show", templateVars);
 });
+
 
 //Delete the URL at shortURL :id
 app.get("/urls/:id/delete", (req, res) => {

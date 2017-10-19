@@ -162,7 +162,7 @@ function deleteShortURL(userID, shortURL) {
   if (urlDatabase[shortURL] === undefined) {
     return false;
   }
-  if (urlDatabase[shortURL].userID == userID) {
+  if (urlDatabase[shortURL].userID === userID) {
     delete urlDatabase[shortURL];
   }
   return true;
